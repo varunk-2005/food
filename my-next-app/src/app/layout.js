@@ -1,6 +1,7 @@
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import Header from "@/component/layout/Header";
+import SessionProviderWrapper from "@/component/SessionProviderWrapper";
 
 const roboto = Roboto({
   variable: "--font-geist-sans",
@@ -17,8 +18,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${roboto.variable} antialiased`}>
         <main className="w-full">
-          <Header />
-          {children}
+          <SessionProviderWrapper>
+            <Header />
+            {children}
+          </SessionProviderWrapper>
         </main>
       </body>
     </html>
