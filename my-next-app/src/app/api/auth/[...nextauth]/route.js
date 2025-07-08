@@ -5,7 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { User } from "../../../Models/User";
 import bcrypt from "bcrypt";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,21 +13,48 @@ const handler = NextAuth({
         email: { label: "Email", type: "email", placeholder: "example@gmail.com" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         try {
-          await mongoose.connect(process.env.MONGO_URL);
+          if (mongoose.connection.readyState === 0) {
+            const mongoUrl = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.NEXT_PUBLIC_MONGO_URL;
+            if (!mongoUrl) {
+              throw new Error("MongoDB connection string is not defined");
+            }
+            await mongoose.connect(mongoUrl);
+            console.log("✅ Connected to MongoDB");
+          }
+
           const email = credentials.email.toLowerCase().trim();
+          const password = credentials.password;
+
+          console.log("🔍 Checking login for:", email);
+
           const user = await User.findOne({ email });
           if (!user) {
+            console.log("❌ User not found");
             return null;
           }
-          const passwordOk = await bcrypt.compare(credentials.password, user.password);
+
+          console.log("👤 Found user:", user.email);
+
+          const passwordOk = await bcrypt.compare(password, user.password);
+          console.log("🔐 Password match:", passwordOk);
+
           if (!passwordOk) {
+            console.log("❌ Invalid password");
             return null;
           }
-          return user;
+
+          console.log("✅ Login success");
+
+          return {
+            id: user._id.toString(),
+            name: user.name || user.email,
+            email: user.email,
+            image: user.picture || null,
+          };
         } catch (error) {
-          console.error("Authorize error:", error);
+          console.error("🔥 Authorize error:", error);
           return null;
         }
       },
@@ -37,6 +64,35 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-});
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image || null;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.picture || null;
+      }
+      return session;
+    },
+  },
+  pages: {
+    signIn: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
