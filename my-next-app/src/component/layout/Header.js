@@ -19,12 +19,12 @@ export default function Header() {
         <nav className="flex items-center space-x-4">
           {session?.user ? (
             <>
-              <span className="text-gray-800 font-medium">Hello, {session.user.name}</span>
-              <img
-                src={session.user.image || session.user.picture || "/default-profile.png"}
-                alt="Profile Picture"
-                className="w-10 h-10 rounded-full object-cover"
-              />
+              <Link
+                href="/profile"
+                className="text-gray-800 font-medium mr-4"
+              >
+                Hello, {session.user.name ? session.user.name.split(" ")[0] : session.user.email}
+              </Link>
               <button
                 onClick={() => signOut()}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold transition"
