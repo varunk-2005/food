@@ -16,18 +16,17 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           if (mongoose.connection.readyState === 0) {
-            const mongoUrl = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.NEXT_PUBLIC_MONGO_URL;
-            if (!mongoUrl) {
-              throw new Error("MongoDB connection string is not defined");
-            }
+            const mongoUrl =
+              process.env.MONGODB_URI ||
+              process.env.MONGO_URL ||
+              process.env.NEXT_PUBLIC_MONGO_URL;
+            if (!mongoUrl) throw new Error("MongoDB connection string is not defined");
             await mongoose.connect(mongoUrl);
-            console.log("✅ Connected to MongoDB");
+            console.log("✅ Connected to MongoDB (Credentials)");
           }
 
           const email = credentials.email.toLowerCase().trim();
           const password = credentials.password;
-
-          console.log("🔍 Checking login for:", email);
 
           const user = await User.findOne({ email });
           if (!user) {
@@ -35,17 +34,11 @@ export const authOptions = {
             return null;
           }
 
-          console.log("👤 Found user:", user.email);
-
           const passwordOk = await bcrypt.compare(password, user.password);
-          console.log("🔐 Password match:", passwordOk);
-
           if (!passwordOk) {
             console.log("❌ Invalid password");
             return null;
           }
-
-          console.log("✅ Login success");
 
           return {
             id: user._id.toString(),
@@ -59,11 +52,13 @@ export const authOptions = {
         }
       },
     }),
+
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -71,9 +66,32 @@ export const authOptions = {
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image || null;
+
+        try {
+          if (mongoose.connection.readyState === 0) {
+            await mongoose.connect(process.env.MONGODB_URI);
+            console.log("✅ Connected to MongoDB (JWT)");
+          }
+
+          const existingUser = await User.findOne({ email: user.email });
+          if (!existingUser) {
+            const randomPassword = Math.random().toString(36).slice(-8);
+            const newUser = await User.create({
+              email: user.email,
+              name: user.name || "Unnamed User",
+              picture: user.image || "",
+              password: randomPassword,
+            });
+            console.log("✅ Created new user (JWT):", newUser.email);
+          }
+        } catch (err) {
+          console.error("❌ JWT DB sync error:", err);
+        }
       }
+
       return token;
     },
+
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -84,12 +102,15 @@ export const authOptions = {
       return session;
     },
   },
+
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
+
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
 
