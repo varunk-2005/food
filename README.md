@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🍕 Food Ordering App
 
-## Getting Started
+A full-stack food ordering web application built with **Next.js**, **MongoDB**, **JWT Authentication**, and **Zustand** for state management.  
+Users can sign up with email/password or Google OAuth, update their profile with an avatar (via Cloudinary), and browse/order menu items.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🔐 **Authentication**
+  - Email/Password login
+  - Google OAuth with NextAuth
+  - JWT-based protected API routes
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- 👤 **User Profiles**
+  - Upload profile picture using **Cloudinary**
+  - Editable profile fields
+  - "Not provided" placeholders for missing info
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🍽️ **Menu Management**
+  - Browse available menu items
+  - Add / edit menu items (admin only)
+  - Categories with simple UI
 
-## Learn More
+- 🖼️ **Image Uploads**
+  - Cloudinary unsigned upload preset
+  - EditableImage component with live preview
 
-To learn more about Next.js, take a look at the following resources:
+- ⚡ **State Management**
+  - **Zustand** for global state
+  - Authentication & profile synced across pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Tech Stack
 
-## Deploy on Vercel
+### Frontend
+- **Next.js (React 18)**
+- **Tailwind CSS**
+- **Axios** for API calls
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Backend
+- **Express.js** (for API routes under `/api/auth`)
+- **MongoDB + Mongoose**
+- **JWT** for secure authentication
+- **Middleware** for protected routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Other Integrations
+- **Cloudinary** for image hosting
+- **NextAuth** (Google + Credentials provider)
+
+---
+
+## 📂 Project Structure
+
+
